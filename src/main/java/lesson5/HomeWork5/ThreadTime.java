@@ -22,7 +22,7 @@ public class ThreadTime {
         return System.currentTimeMillis() - t;
     }
 
-    static long meted2(float[] arr) {
+    static long meted2(float[] arr) throws InterruptedException {
         long t = System.currentTimeMillis();
 
         float[] arr1 = new float[HALF];
@@ -30,16 +30,23 @@ public class ThreadTime {
         System.arraycopy(arr, 0, arr1, 0, HALF);
         System.arraycopy(arr, HALF, arr2, 0, HALF);
 
-        new Thread(() -> {
+        Thread th1 = new Thread(() -> {
             for (int i = 0; i < HALF; i++) {
                 arr1[i] = (float) (arr1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
             }
-        }).start();
-        new Thread(() -> {
+            System.out.println("Превая половина");
+        });
+        Thread th2 = new Thread(() -> {
             for (int i = 0; i < HALF; i++) {
                 arr2[i] = (float) (arr2[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
             }
-        }).start();
+            System.out.println("Вторая половина");
+        });
+        th1.start();
+        th2.start();
+
+        th1.join();
+        th2.join();
 
         System.arraycopy(arr1, 0, arr, 0, HALF);
         System.arraycopy(arr2, 0, arr, HALF, HALF);
@@ -52,7 +59,13 @@ public class ThreadTime {
                 System.out.println("Превый метод выполнился за: " + meted1(arr()) + "мс."))
                 .start();
         new Thread(() ->
-                System.out.println("Второй метод выполнился за: " + meted2(arr()) + "мс."))
+        {
+            try {
+                System.out.println("Второй метод выполнился за: " + meted2(arr()) + "мс.");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        })
                 .start();
     }
 }
