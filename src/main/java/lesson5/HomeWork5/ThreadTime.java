@@ -1,7 +1,5 @@
 package lesson5.HomeWork5;
 
-import java.util.Arrays;
-
 public class ThreadTime {
     static final int SIZE = 10000000;
     static final int HALF = SIZE / 2;
@@ -14,17 +12,14 @@ public class ThreadTime {
         return m;
     }
 
-    static long meted1(float[] arr) {
-        long t = System.currentTimeMillis();
+    static synchronized void meted1(float[] arr) {
+
         for (int i = 0; i < SIZE; i++) {
             arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
         }
-        return System.currentTimeMillis() - t;
     }
 
-    static long meted2(float[] arr) throws InterruptedException {
-        long t = System.currentTimeMillis();
-
+    synchronized static void meted2(float[] arr) {
         float[] arr1 = new float[HALF];
         float[] arr2 = new float[HALF];
         System.arraycopy(arr, 0, arr1, 0, HALF);
@@ -45,27 +40,19 @@ public class ThreadTime {
         th1.start();
         th2.start();
 
-        th1.join();
-        th2.join();
-
         System.arraycopy(arr1, 0, arr, 0, HALF);
         System.arraycopy(arr2, 0, arr, HALF, HALF);
-
-        return System.currentTimeMillis() - t;
     }
 
     public static void main(String[] args) {
-        new Thread(() ->
-                System.out.println("Превый метод выполнился за: " + meted1(arr()) + "мс."))
-                .start();
-        new Thread(() ->
-        {
-            try {
-                System.out.println("Второй метод выполнился за: " + meted2(arr()) + "мс.");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        })
-                .start();
+        float[] arr1 = arr();
+        float[] arr2 = arr();
+        long t = System.currentTimeMillis();
+        meted1(arr1);
+        System.out.println("Превый метод выполнился за: " + (System.currentTimeMillis() - t) + "мс.");
+        t = System.currentTimeMillis();
+        meted2(arr2);
+        System.out.println("Второй метод выполнился за: " + (System.currentTimeMillis() - t) + "мс.");
+
     }
 }
